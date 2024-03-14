@@ -62,3 +62,21 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+exports.getUserByQuery = async (req, res) => {
+    try {
+        const searchTerm = req.params.query; // Suponiendo que el término de búsqueda se pasa como parámetro en la URL
+        const users = await User.find({
+            $or: [
+                { name: { $regex: searchTerm, $options: 'i' } }, // Búsqueda insensible a mayúsculas y minúsculas
+                { email: { $regex: searchTerm, $options: 'i' } },
+            ]
+        });
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
